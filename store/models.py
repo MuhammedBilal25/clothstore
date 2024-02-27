@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+
 
 
 class Category(models.Model):
@@ -42,7 +44,6 @@ class Basket(models.Model):
     updated_date=models.DateTimeField(auto_now=True)
     is_active=models.BooleanField(default=True)
 
-
 class BasketItem(models.Model):
     product_object=models.ForeignKey(Product,on_delete=models.CASCADE)
     qty=models.PositiveIntegerField(default=1)
@@ -50,4 +51,14 @@ class BasketItem(models.Model):
     created_date=models.DateTimeField(auto_now_add=True)
     updated_date=models.DateTimeField(auto_now=True)
     is_active=models.BooleanField(default=True)
+
+
+def create_basket(sender,instance,created,**kwargs):
+    if created:
+        Basket.objects.create(owner=instance)
+
+post_save.connect(create_basket,sender=User)
+
+
+
 
