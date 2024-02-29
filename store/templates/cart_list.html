@@ -1,11 +1,45 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    {{data}}
-</body>
-</html>
+{%extends 'base.html'%}
+{%block main_block%}
+<div class="container cart">
+    <table>
+      <tr>
+        <th>Product</th>
+        <th>Quantity</th>
+        <th>Subtotal</th>
+      </tr>
+     <!-- iterate start-->
+     {%for bi in data%}
+     <tr>
+        <td>
+          <div class="cart-info">
+            <img src="{{bi.product_object.image.url}}" alt="" />
+            <div>
+              <p>{{bi.product_object.title}}</p>
+              <span>Price: {{bi.product_object.price}}</span> <br />
+              <a href="#">remove</a>
+            </div>
+          </div>
+        </td>
+        <td><input type="number" value="{{bi.qty}}" min="1" /></td>
+        <td>{{bi.item_total}}</td>
+      </tr>
+     {%endfor%}
+
+    
+     <!-- iterate end -->
+  
+    </table>
+    <div class="total-price">
+      <table>
+        <tr>
+          <td>Subtotal</td>
+          <td>{{request.user.cart.cart_total}}</td>
+        </tr>
+       
+        </tr>
+      </table>
+      <a href="#" class="checkout btn">Proceed To Checkout</a>
+    </div>
+  </div>
+
+{%endblock%}
