@@ -28,5 +28,13 @@ urlpatterns = [
     path("products/<int:pk>/",views.ProductDetailView.as_view(),name="product-detail"),
     path("home",views.HomeView.as_view(),name="home"),
     path("products/<int:pk>/add_to_basket",views.AddToBasketView.as_view(),name="addto-basket"),
-    path("basket/items/all",views.BasketItemListView.as_view(),name="basket-items")
+    path("basket/items/all",views.BasketItemListView.as_view(),name="basket-items"),
+    path('basket/items/<int:pk>/remove',views.BasketItemRemoveView.as_view(),name="basketitem-remove"),
+    path('basket/items/<int:pk>/qty/change',views.CartItemUpdateQuandityView.as_view(),name="editcart-qty"),
+    path('checkout/',views.CheckOutView.as_view(),name="checkout"),
+    path('signout/',views.SignOutView.as_view(),name="signout"),
+    path('order/summary/',views.OrderSummaryView.as_view(),name="order-summary"),
+    path('orders/item/<int:pk>/remove/',views.OrderItemRemoveView.as_view(),name="order-remove"),
+    path('payment/verification/',views.PaymentVerificationView.as_view(),name="verification"),
+
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
