@@ -7,12 +7,12 @@ from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_exempt
 
 from store.forms import RegistrationForm,LoginForm
-from store.models import Product,BasketItem,Size,Order,OrderItems
+from store.models import Product,BasketItem,Size,Order,OrderItems,Category,Tag
 from store.decorators import signinrequired,owner_permission_required
 import razorpay
 
-KEY_ID="rzp_test_oCFtiK9xM2H3af"
-KEY_SECRET="YWr76dRt69Km2Ld5rcwV5o1J"
+KEY_ID="****************"
+KEY_SECRET="******************"
 # Create your views here.
 
 # url: localhoast:8000/
@@ -59,7 +59,18 @@ class SignInView(View):
 class IndexView(View):
     def get(self,request,*args,**kwargs):
         qs=Product.objects.all()
-        return render(request,"index.html",{"data":qs})
+        categories=Category.objects.all()
+        tags=Tag.objects.all()
+        selected_category=request.GET.get("category")
+        if selected_category:
+            qs=qs.filter(category_object__name=selected_category)
+        return render(request,"index.html",{"data":qs,"categories":categories,"tags":tags})
+    
+    def post(self,request,*args,**kwargs):
+        tag_name=request.POST.get("tag")
+        tags=Tag.objects.all()
+        qs=Product.objects.filter(tag_objects__name=tag_name)
+        return render(request,"index.html",{"data":qs,"tags":tags})
         
 @method_decorator([signinrequired,never_cache],name="dispatch")
 class ProductDetailView(View):
@@ -159,6 +170,8 @@ class CheckOutView(View):
                 client = razorpay.Client(auth=(KEY_ID,KEY_SECRET))
                 data = { "amount": order_obj.get_order_total*100, "currency": "INR", "receipt": "order_rcptid_11" }
                 payment = client.order.create(data=data)
+                order_obj.order_id=payment.get("id")
+                order_obj.save()
                 context={
                     "key":KEY_ID,
                     "order_id":payment.get("id"),
@@ -187,7 +200,18 @@ class OrderItemRemoveView(View):
 @method_decorator(csrf_exempt,name="dispatch")
 class PaymentVerificationView(View):
     def post(self,request,*args,**kwargs):
-        print("234567========",request.POST)
+        client = razorpay.Client(auth=(KEY_ID,KEY_SECRET))
+        data=request.POST
+        try:
+        
+            client.utility.verify_payment_signature(data)
+            print(data)
+            order_obj=Order.objects.get(order_id=data.get("razorpay_order_id"))
+            order_obj.is_paid=True
+            order_obj.save()
+            print("=========TRANSATION COMPLETE=======")
+        except:
+            print("=======TRANSACTION FAILED=====")
         return render(request,"success.html")
 
 
